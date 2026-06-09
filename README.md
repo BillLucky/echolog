@@ -71,10 +71,17 @@ you ─DM─▶  Feishu / Telegram bot  ──▶  Daily_Vault/2026-06-09/
 ```bash
 git clone https://github.com/BillLucky/echolog.git
 cd echolog
+bash scripts/setup.sh      # one command: checks Node, npm install, installs the `echolog` CLI, prepares .env, runs a doctor check
+```
+
+<details><summary>…or do it manually</summary>
+
+```bash
 npm install
-npm link           # installs the `echolog` CLI (no sudo needed with a user node prefix)
+npm link            # installs the `echolog` CLI (no sudo needed with a user node prefix)
 cp .env.example .env
 ```
+</details>
 
 ### 3. Pick your LLM (edit `.env`)
 
@@ -103,8 +110,9 @@ LLM_VISION_MODEL=claude-sonnet-4-6
 
 ### 4. Connect a channel & run
 
-Create a self-built Feishu app, fill `FEISHU_APP_ID` / `FEISHU_APP_SECRET` in `.env`,
-enable **long-connection** event subscription for `im.message.receive_v1`, then:
+Create a self-built Feishu app and fill `FEISHU_APP_ID` / `FEISHU_APP_SECRET` in `.env`.
+**[`docs/FEISHU_SETUP.md`](docs/FEISHU_SETUP.md) is paste-ready** — copy the permission list,
+event subscriptions, and the bot-menu `event_key` table straight into the console. Then:
 
 ```bash
 echolog start        # run the Feishu channel in the background

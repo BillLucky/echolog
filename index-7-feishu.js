@@ -1005,6 +1005,12 @@ async function handleMessage({ message, sender }) {
       return;
     }
 
+    // 记住 p2p 主聊天 chat_id —— bot 菜单点击事件(menu_v6)不带 chat_id，回信时用它
+    if (chatId && state.paired_chat_id !== chatId && (!message.chat_type || message.chat_type === 'p2p')) {
+      state.paired_chat_id = chatId;
+      saveState(state);
+    }
+
     const msgType = message.message_type;
     let content;
     try {
@@ -1252,6 +1258,30 @@ async function backfillNewChat(chatId, beforeMs) {
 // ==========================================================================
 // 启动
 // ==========================================================================
+// 飞书 bot 自定义菜单点击 —— event_key 即命令名（如 "diary"），映射成 /命令 复用 tryDispatchCommand。
+// menu_v6 事件不带 chat_id，回信用上面记下的 state.paired_chat_id。
+async function handleBotMenu(data) {
+  const openId = data?.operator?.operator_id?.open_id;
+  const key = (data?.event_key || '').trim();
+  console.log(`[🔘 bot.menu] key=${key} by=${openId}`);
+  if (!key) return;
+  if (state.paired_open_id && openId && openId !== state.paired_open_id) {
+    console.log('[🚫 非授权菜单点击]');
+    return;
+  }
+  const chatId = state.paired_chat_id;
+  if (!chatId) {
+    console.log('[⚠️ 菜单点击但无 paired_chat_id —— 先给 bot 发任意一条消息激活]');
+    return;
+  }
+  const cmd = key.startsWith('/') ? key : '/' + key;
+  try {
+    await tryDispatchCommand(cmd, chatId, dayjs().tz('Asia/Shanghai'));
+  } catch (err) {
+    console.error('[❌ 菜单命令]', err.message);
+  }
+}
+
 async function main() {
   try {
     await catchupKnownChats();
@@ -1267,6 +1297,14 @@ async function main() {
         await handleMessage({ message: data.message, sender: data.sender });
       } catch (err) {
         console.error('[❌ event 处理]', err);
+      }
+    },
+    // bot 自定义菜单点击 → 映射成命令执行
+    'application.bot.menu_v6': async data => {
+      try {
+        await handleBotMenu(data);
+      } catch (err) {
+        console.error('[❌ menu 事件处理]', err);
       }
     },
     // bot 自己加的 reaction 也会回声成事件，这里统一吞掉

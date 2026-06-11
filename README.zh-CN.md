@@ -10,8 +10,10 @@
 
 [English](README.md) | 简体中文
 
+[![CI](https://github.com/BillLucky/echolog/actions/workflows/ci.yml/badge.svg)](https://github.com/BillLucky/echolog/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg)](https://nodejs.org)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-快速上手)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 </div>
@@ -53,6 +55,7 @@ you ─DM─▶  Feishu / Telegram bot  ──▶  Daily_Vault/2026-06-09/
 | ✍️ **草稿流水线** | `/draft` 把一条采集到的灵感变成推特串 / 长文 / 短视频脚本，并从 recall 索引里拉跨天素材。 |
 | 📅 **周报** | `/week` 把过去 7 天卷成一份周度回顾。 |
 | 🖥️ **桌面 GUI** | 可选的 Electron 应用，用来浏览 vault、搜索、编辑 prompt、控制 bot —— 不用碰终端。 |
+| 🪟 **跨平台** | 支持 **macOS、Linux、Windows**。CLI 是零依赖 Node 脚本；ffmpeg/whisper/ollama 等二进制自动从 `PATH` 探测。CI 在三大系统上各跑一遍完整测试。 |
 | 🔒 **本地优先且私密** | Vault、`.env`、状态文件全部 gitignored。用 Ollama 可完全离线运行，或只把日记文本发给你选定的云端 LLM。 |
 
 ## 🚀 快速上手
@@ -158,6 +161,15 @@ npm run package                              # build a macOS app
 - **贡献与开发环境** —— [CONTRIBUTING.md](CONTRIBUTING.md) · **路线图** —— [ROADMAP.md](ROADMAP.md)
 - **AI 编码指南** —— [CLAUDE.md](CLAUDE.md) · **更新日志** —— [CHANGELOG.md](CHANGELOG.md) · **安全** —— [SECURITY.md](SECURITY.md)
 - **English** —— [English](README.md)
+
+## 🙌 贡献者
+
+echolog 在开放中构建。感谢每一位让它变得更好的人：
+
+- [@BillLucky](https://github.com/BillLucky) —— 创建者与维护者
+- [@ShengVP](https://github.com/ShengVP) —— Windows 跨平台支持：零依赖 Node CLI、跨平台二进制探测、去硬编码路径（[#3](https://github.com/BillLucky/echolog/pull/3)）
+
+我们真心欢迎新贡献者 —— 从 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [good first issues](https://github.com/BillLucky/echolog/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 开始。你的第一个 PR 就能出现在这份名单里。🚀
 
 ## 许可证
 

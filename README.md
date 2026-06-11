@@ -10,8 +10,10 @@ evidence-based diary. 100% local-first; bring your own LLM.
 
 English | [简体中文](README.zh-CN.md)
 
+[![CI](https://github.com/BillLucky/echolog/actions/workflows/ci.yml/badge.svg)](https://github.com/BillLucky/echolog/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg)](https://nodejs.org)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-quickstart)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 </div>
@@ -53,6 +55,7 @@ you ─DM─▶  Feishu / Telegram bot  ──▶  Daily_Vault/2026-06-09/
 | ✍️ **Draft pipeline** | `/draft` turns a captured idea into a Twitter thread / long-form post / short-video script, pulling cross-day material from the recall index. |
 | 📅 **Weekly reports** | `/week` rolls the past 7 days into a weekly review. |
 | 🖥️ **Desktop GUI** | Optional Electron app to browse the vault, search, edit prompts, and control the bot — no terminal needed. |
+| 🪟 **Cross-platform** | Runs on **macOS, Linux, and Windows**. The CLI is a zero-dependency Node script; binaries (ffmpeg/whisper/ollama) are auto-detected on `PATH`. CI runs the full suite on all three OSes. |
 | 🔒 **Local-first & private** | Vault, `.env`, and state files are all gitignored. Run fully offline with Ollama, or send only diary text to a cloud LLM you choose. |
 
 ## 🚀 Quickstart
@@ -169,6 +172,15 @@ npm run package                              # build a macOS app
 - **Contributing & dev setup** — [CONTRIBUTING.md](CONTRIBUTING.md) · **Roadmap** — [ROADMAP.md](ROADMAP.md)
 - **AI coding guide** — [CLAUDE.md](CLAUDE.md) · **Changelog** — [CHANGELOG.md](CHANGELOG.md) · **Security** — [SECURITY.md](SECURITY.md)
 - **简体中文** — [README.zh-CN.md](README.zh-CN.md)
+
+## 🙌 Contributors
+
+echolog is built in the open. Thanks to everyone who makes it better:
+
+- [@BillLucky](https://github.com/BillLucky) — creator & maintainer
+- [@ShengVP](https://github.com/ShengVP) — Windows cross-platform support: zero-dependency Node CLI, cross-platform binary detection, de-hardcoded paths ([#3](https://github.com/BillLucky/echolog/pull/3))
+
+New contributors are genuinely welcome — start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [good first issues](https://github.com/BillLucky/echolog/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22). Your first PR can land in this list. 🚀
 
 ## License
 

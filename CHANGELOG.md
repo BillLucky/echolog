@@ -2,6 +2,30 @@
 
 按时间倒序，最新在最上面。
 
+## v1.0.0 (2026-06-11) — 跨平台 + 首个公开发布
+
+echolog 的第一个正式 release。核心主题：**真正跨平台**（macOS / Linux / Windows）+ 工程化基建。
+首个外部贡献者 [@ShengVP](https://github.com/ShengVP) 带来了 Windows 适配（PR [#3](https://github.com/BillLucky/echolog/pull/3)）。
+
+### 跨平台 (Windows / Linux / macOS)
+- **CLI 重写为零依赖 Node.js**（`bin/echolog`）：`child_process.spawn(detached)` + PID 文件管理后台进程，
+  `process.kill(pid,0)` 跨平台探活，`logs -f` 用 `fs.watchFile` 替代 `tail -f`，全程 `windowsHide`。
+  不引 pm2 等第三方进程管理器，保持「轻量、零依赖」。
+- **`lib/utils.js` `findBin`**：跨平台二进制探测（Windows `where` / Unix `which` + 常见安装路径兜底）。
+- **去硬编码**：`feishu.js` / `doctor.js` / `init-wizard.js` 不再写死 `/opt/homebrew`，改 `findBin` +
+  `HOME || USERPROFILE` 兼容；whisper/ffmpeg 缺失时给清晰报错与按平台安装提示（brew / winget / release）。
+- 文档：README（中英）、`CLAUDE.md`、`docs/FEISHU_SETUP.md` 补全 Windows 用法（`node bin/echolog <cmd>`）。
+
+### 工程化 / CI
+- **GitHub Actions 三平台 matrix**：`ubuntu` / `windows` / `macos` × Node 22，每次提交都跑入口 +
+  全 `lib` 的 `node --check` 与单元测试；新增 **desktop job**（TypeScript 类型检查 + vite 编译 + vitest）。
+- 修复 CI 自开源以来一直失败的问题：`.gitignore` 忽略 `package-lock.json` 却用 `cache:npm` + `npm ci`
+  （二者都强依赖 lock 文件）→ 改 `npm install --no-audit --no-fund`。
+- 新增单测：`tests/utils.test.js`（findBin）+ `tests/paths.test.js`（`ECHOLOG_DATA_DIR` 重定位）。
+
+### 致谢
+- [@ShengVP](https://github.com/ShengVP) —— 首个外部贡献者，Windows 跨平台适配。
+
 ## v0.4.0 (2026-05-28) — Prompt 全配置化
 
 朋友实测反馈后的迭代：把所有写死的 prompt 都抽出来走文件 + GUI 编辑。

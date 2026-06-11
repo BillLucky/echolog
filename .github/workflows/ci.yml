@@ -12,9 +12,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: syntax check + unit tests
-    runs-on: ubuntu-latest
+  # ---------------------------------------------------------------------------
+  # bot 端：三平台 × node 22 跑语法检查 + 单元测试
+  # Windows runner 真实验证跨平台代码（findBin / 路径 / CLI 进程管理）
+  # ---------------------------------------------------------------------------
+  bot:
+    name: bot (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
 
@@ -28,7 +36,9 @@ jobs:
         run: npm install --no-audit --no-fund
 
       # 入口文件 + 所有 lib 模块都过一遍 `node --check`（纯语法/解析校验）
+      # shell: bash → Windows runner 也用 Git Bash 跑，glob 与 for 循环行为一致
       - name: Syntax check
+        shell: bash
         run: |
           for f in telegram.js feishu.js lib/*.js; do
             [ -f "$f" ] || continue
@@ -39,9 +49,40 @@ jobs:
       # tests/*.test.js 是自跑脚本（纯 node:assert + process.exit，不是 node:test runner），
       # 所以逐个用 `node` 直接执行，而不是 `node --test`
       - name: Unit tests
+        shell: bash
         run: |
           for f in tests/*.test.js; do
             [ -f "$f" ] || continue
             echo "▶ $f"
             node "$f"
           done
+
+  # ---------------------------------------------------------------------------
+  # desktop 端（GUI）：TypeScript 类型检查 + vite 编译 + vitest
+  # 重型的 electron-builder 打包（.dmg，需 mac + 签名）不在 CI 跑
+  # ---------------------------------------------------------------------------
+  desktop:
+    name: desktop (build + vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 根依赖（含 undici）—— desktop 的 tsc 会沿父目录 node_modules 向上解析到它
+      - name: Install root deps
+        run: npm install --no-audit --no-fund
+
+      - name: Install desktop deps
+        working-directory: desktop
+        run: npm install --no-audit --no-fund
+
+      - name: Type-check + build
+        working-directory: desktop
+        run: npm run build
+
+      - name: Unit tests (vitest)
+        working-directory: desktop
+        run: npm test

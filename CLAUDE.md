@@ -24,7 +24,7 @@ npm run feishu           # = node feishu.js
 npm run tg               # = node telegram.js
 ```
 
-CLI 实现：`bin/echolog` (Node.js 脚本)，用 `child_process.spawn(detached)` + PID 文件（`~/.echolog/<channel>.pid`）做跨平台进程管理，日志按天写到 `~/.echolog/logs/<channel>-YYYY-MM-DD.log`。Windows 上不支持 bash，用 `node bin/echolog <command>` 替代 `echolog <command>`，或 `npm link` 注册全局命令。
+CLI 实现：`bin/echolog` (**零依赖 Node.js 脚本**，`#!/usr/bin/env node`)，用 `child_process.spawn(detached)` + PID 文件做进程管理（PID 写到 `~/.echolog/<channel>.pid`），探活用跨平台 `process.kill(pid, 0)`，`logs -f` 用 `fs.watchFile` 而非 `tail -f`；日志按天写到 `~/.echolog/logs/<channel>-YYYY-MM-DD.log`。改 CLI 行为只动 `bin/echolog`，**保持零第三方依赖**（只用 Node 内置 `child_process`/`fs`/`os`/`path`/`http`，不引 pm2 等进程管理器）。早期是 bash 脚本，为支持 Windows（无 bash）重写成 Node，但「轻量、零依赖」原则不变。Windows 上用 `node bin\echolog <command>` 或 `npm link` 后全局调用。
 
 两个通道可同时运行，写到同一个 `Daily_Vault/`，互不干扰（`fs.appendFileSync` append-only）。没有测试、lint、build 流程；改完 `echolog restart` 验证。
 

@@ -18,13 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # package-lock.json 被 .gitignore（个人项目，不锁版本），故不开 cache: npm、
+      # 也用 npm install 而非 npm ci（两者都强依赖 lock 文件，缺则整个 job 失败）
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       # 入口文件 + 所有 lib 模块都过一遍 `node --check`（纯语法/解析校验）
       - name: Syntax check

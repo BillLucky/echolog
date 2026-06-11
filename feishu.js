@@ -423,14 +423,30 @@ async function generateDiary(dateStr, chatId) {
 
   await sendText(chatId, `✍️ 信息整合完成，调用 ${OLLAMA_TEXT_MODEL} 写日记...`);
 
-  const userPrompt = `
+  // 上下文容量自适应（病因：一天 logs 可达 2~3 万字，固定 num_ctx=16384 会让
+  // prompt 从头被截断、system 指令丢失 → 模型吐空 → 空日记卡片）。
+  // 先按全量 prompt 估 num_ctx；若极端长超过封顶，截断 augmentedLogs 兜底不溢出。
+  const promptFixed = DIARY_SYSTEM_PROMPT + ticktickBlock + DIARY_TEMPLATE;
+  let numCtx = ollama.estimateNumCtx(promptFixed + augmentedLogs);
+  const maxInputChars = ollama.capCharsForCtx(numCtx) - promptFixed.length;
+  if (augmentedLogs.length > maxInputChars) {
+    const headLen = 2000;
+    const tailLen = Math.max(0, maxInputChars - headLen - 200);
+    augmentedLogs =
+      augmentedLogs.slice(0, headLen) +
+      `\n\n> ⚠️ [当日记录过长，中间部分已省略以适应模型上下文；保留早晨开头 + 当日后段]\n\n` +
+      augmentedLogs.slice(-tailLen);
+    console.warn(`[⚠️ diary] ${dateStr} logs 过长，已截断至约 ${maxInputChars} 字符（num_ctx=${numCtx}）`);
+  }
+
+  const buildUserPrompt = (logs) => `
 日期：${dateStr}
 
 【滴答清单上下文（截至当前）】
 ${ticktickBlock}
 
 【今日 logs（已注入图片视觉描述）】
-${augmentedLogs}
+${logs}
 
 ==========
 请严格按下面的模板输出 markdown 日记：
@@ -438,20 +454,38 @@ ${augmentedLogs}
 ${DIARY_TEMPLATE}
   `.trim();
 
-  const r = await ollama.chat({
-    model: OLLAMA_TEXT_MODEL,
-    messages: [
-      { role: 'system', content: DIARY_SYSTEM_PROMPT },
-      { role: 'user', content: userPrompt },
-    ],
-    think: false,
-    stream: false,
-    options: {
-      temperature: 0.3,    // 收紧：不要发散文学化
-      num_ctx: 16384,      // 容纳长 logs + ticktick 上下文
-    },
-  });
-  const diaryContent = r.message.content;
+  const callModel = async (ctx) => {
+    const r = await ollama.chat({
+      model: OLLAMA_TEXT_MODEL,
+      messages: [
+        { role: 'system', content: DIARY_SYSTEM_PROMPT },
+        { role: 'user', content: buildUserPrompt(augmentedLogs) },
+      ],
+      think: false,
+      stream: false,
+      options: {
+        temperature: 0.3,    // 收紧：不要发散文学化
+        num_ctx: ctx,        // 自适应：容纳当日 logs + ticktick 上下文
+      },
+    });
+    return (r.message?.content || '').trim();
+  };
+
+  let diaryContent = await callModel(numCtx);
+
+  // 空输出守卫：模型返回空/过短（上下文仍偏紧、或偶发吐空）→ 顶到封顶 ctx 重试一次。
+  if (diaryContent.length < 30) {
+    console.warn(`[⚠️ diary] ${dateStr} 首次返回空内容（num_ctx=${numCtx}），顶到 98304 重试`);
+    numCtx = 98304;
+    await sendText(chatId, '↻ 内容偏长，扩大上下文重试一次...');
+    diaryContent = await callModel(numCtx);
+  }
+  // 仍为空：明确报错，不写空文件、不占版本号、不发空卡片（原始记录已安全落档）。
+  if (diaryContent.length < 30) {
+    console.error(`[❌ diary] ${dateStr} 模型两次均返回空内容，已放弃本次生成`);
+    await sendText(chatId, '⚠️ 日记生成失败：模型两次返回空内容（可能当日记录过长或模型异常）。原始记录已完整保存，稍后可重试 /diary，或精简后再试。');
+    return;
+  }
 
   // 后置：把 Action Items + 选题分别同步到滴答清单（带去重）
   // 同时把选题镜像到本地 Daily_Vault/Notes/，方便在 Obsidian 里管理

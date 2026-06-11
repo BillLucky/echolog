@@ -3,7 +3,7 @@ Daily_*
 
 node_modules/
 package-lock.json
-
+docs/superpowers
 .env
 .env.*
 !.env.example

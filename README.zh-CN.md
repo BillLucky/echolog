@@ -64,7 +64,7 @@ you ─DM─▶  Feishu / Telegram bot  ──▶  Daily_Vault/2026-06-09/
 | **Node.js ≥ 22** | 运行时（undici 8 要求 Node 22） | https://nodejs.org |
 | **一个 LLM** | 写日记 | 本地 [Ollama](https://ollama.com)，**或**一个云端 API key（见第 3 步） |
 | 一个 **飞书** 应用 | 对话通道 | https://open.feishu.cn （或一个 Telegram bot token） |
-| *（可选）* `whisper-cpp` + `ffmpeg` | 语音转录 | `brew install whisper-cpp ffmpeg` |
+| *（可选）* `whisper-cpp` + `ffmpeg` | 语音转录 | macOS: `brew install whisper-cpp ffmpeg`；Windows: 暂不支持语音转录 |
 
 ### 2. 安装
 
@@ -107,10 +107,13 @@ LLM_VISION_MODEL=claude-sonnet-4-6
 为 `im.message.receive_v1` 开启**长连接**事件订阅，然后：
 
 ```bash
-echolog start        # run the Feishu channel in the background
-echolog logs -f      # follow logs
-echolog tg start     # (optional) Telegram channel
+echolog start        # 后台启动飞书通道
+echolog logs -f      # 实时跟踪日志
+echolog tg start     # （可选）Telegram 通道
 ```
+
+> **Windows 用户**：如未 `npm link`，用 `node bin/echolog start` 替代 `echolog start`。
+> `npm link` 需要在管理员终端里跑。详见 [`docs/FEISHU_SETUP.md`](docs/FEISHU_SETUP.md) 第 6 节。
 
 给你的 bot 发几条消息，再发 `/diary`。第一条 p2p 消息会把 bot 跟你配对；
 其他任何人都会被静默忽略。

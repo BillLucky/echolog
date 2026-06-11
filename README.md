@@ -64,7 +64,7 @@ you ─DM─▶  Feishu / Telegram bot  ──▶  Daily_Vault/2026-06-09/
 | **Node.js ≥ 22** | runtime (undici 8 requires Node 22) | https://nodejs.org |
 | **An LLM** | writes the diaries | local [Ollama](https://ollama.com), **or** a cloud API key (see step 3) |
 | A **Feishu** app | the chat channel | https://open.feishu.cn (or a Telegram bot token) |
-| *(optional)* `whisper-cpp` + `ffmpeg` | voice transcription | `brew install whisper-cpp ffmpeg` |
+| *(optional)* `whisper-cpp` + `ffmpeg` | voice transcription | macOS: `brew install whisper-cpp ffmpeg`; Windows: 暂不支持语音转录 |
 
 ### 2. Install
 
@@ -74,11 +74,14 @@ cd echolog
 bash scripts/setup.sh      # one command: checks Node, npm install, installs the `echolog` CLI, prepares .env, runs a doctor check
 ```
 
-<details><summary>…or do it manually</summary>
+> **Windows users**: the bash setup script won't run natively. Do the manual steps below instead.
+> `npm link` requires an admin terminal on Windows. Or skip it entirely and use `node bin/echolog <command>`.
+
+<details><summary>…or do it manually (also: Windows)</summary>
 
 ```bash
 npm install
-npm link            # installs the `echolog` CLI (no sudo needed with a user node prefix)
+npm link            # installs the `echolog` CLI (macOS/Linux: no sudo needed with a user node prefix; Windows: admin terminal)
 cp .env.example .env
 ```
 </details>
@@ -119,6 +122,9 @@ echolog start        # run the Feishu channel in the background
 echolog logs -f      # follow logs
 echolog tg start     # (optional) Telegram channel
 ```
+
+> **Windows**: if you skipped `npm link`, use `node bin/echolog start` (and likewise for
+> `stop`, `restart`, `status`, `logs`). See [`docs/FEISHU_SETUP.md`](docs/FEISHU_SETUP.md) section 6.
 
 DM your bot a few messages, then send `/diary`. The first p2p message pairs the
 bot to you; everyone else is silently ignored.
